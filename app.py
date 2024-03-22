@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from collections import OrderedDict
 import uuid
 
 app = Flask(__name__)
@@ -54,6 +55,7 @@ def get_user(id):
 	return {
 		'id': user.public_id, 'name': user.name, 
 		'email': user.email, 'is admin': user.is_admin
+		# 'todos': user.todos
 		}
 
 @app.route('/users/', methods=['POST'])
@@ -92,12 +94,12 @@ def update_user(id):
 		}, 400
 	user = User.query.filter_by(public_id=id).first_or_404()
 	user.name=data['name']
-	if 'is admin' in data:
-		user.is_admin=data['admin']
+	if 'is_admin' in data:
+		user.is_admin=bool(data['is_admin'])
 	db.session.commit()
-	return jsonify({
+	return OrderedDict({
 		'id': user.public_id, 
-		'name': user.name, 'is admin': user.is_admin,
+		'name': user.name,'is admin': user.is_admin,
 		'email': user.email
 		})
 
